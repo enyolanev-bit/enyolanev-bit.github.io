@@ -1,4 +1,4 @@
-# nevil enyola — personal site
+# nevil enyola  personal site
 
 Source for **https://enyolanev-bit.github.io** (and eventually `enyola.ai`).
 
@@ -6,8 +6,8 @@ Single static page, monospace, ayomide-style. Bilingual (EN-first + FR). Hosted 
 
 ## What's here
 
-- `index.html` — the whole site, one file. EN/FR toggle persists in localStorage.
-- `LICENSE` — site copy is CC BY 4.0, code (HTML/CSS/JS) is MIT.
+- `index.html`  the whole site, one file. EN/FR toggle persists in localStorage.
+- `LICENSE`  site copy is CC BY 4.0, code (HTML/CSS/JS) is MIT.
 
 ## Why a single HTML file
 
