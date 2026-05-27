@@ -74,22 +74,14 @@
     margin-bottom: 28px;
   }
 
-  /* photo placeholder */
+  /* photo */
   .photo {
     width: 96px;
     height: 96px;
     border-radius: 50%;
-    background: #ede8df;
+    object-fit: cover;
     margin-bottom: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--ink-faint);
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    font-style: italic;
+    display: block;
   }
 
   /* section titles */
@@ -183,7 +175,7 @@
 
   <h1>Nevil Enyola</h1>
 
-  <div class="photo">photo</div>
+  <img class="photo" src="avatar.jpg" alt="Nevil Enyola" />
 
 
   <!-- ====== ENGLISH ====== -->
