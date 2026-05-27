@@ -156,47 +156,12 @@
   /* email */
   .email { color: var(--ink); }
 
-  /* AGENT LOG — the differentiator */
-  .agent-log {
-    margin-top: 14px;
-    padding: 18px 18px 16px;
-    background: #f4f1ea;
-    border: 1px solid var(--rule);
-    border-radius: 4px;
-    font-size: 12.5px;
-    line-height: 1.7;
-  }
-  .agent-log .log-line {
-    color: var(--ink-soft);
-    display: flex;
-    gap: 12px;
-  }
-  .agent-log .log-time {
-    color: var(--ink-faint);
-    flex-shrink: 0;
-    min-width: 78px;
-  }
-  .agent-log .log-msg { color: var(--ink); }
-  .agent-log .log-meta {
-    color: var(--ink-faint);
-    font-size: 11px;
-    margin-top: 12px;
-    border-top: 1px dashed var(--rule);
-    padding-top: 10px;
-  }
-  .agent-log .log-meta a {
-    color: var(--ink-soft);
-    text-decoration-color: var(--ink-faint);
-  }
-
   /* mobile */
   @media (max-width: 620px) {
     body { padding: 56px 20px 80px; font-size: 13px; }
     h1 { font-size: 19px; }
     .photo { width: 80px; height: 80px; margin-bottom: 40px; }
     .lang-switch { top: 16px; right: 18px; font-size: 10px; }
-    .agent-log { padding: 14px; font-size: 11.5px; }
-    .agent-log .log-time { min-width: 64px; }
   }
 </style>
 </head>
@@ -220,8 +185,8 @@
 
     <h2>now</h2>
     <p>
-      field service engineer at <a href="https://www.technogym.com" target="_blank" rel="noopener">Technogym</a> France
-      since September 2025, covering Île-de-France. building <a href="https://qevor.ai" target="_blank" rel="noopener">qevor</a>
+      field service engineer at <a href="https://www.technogym.com" target="_blank" rel="noopener">Technogym</a> France,
+      covering Île-de-France. building <a href="https://qevor.ai" target="_blank" rel="noopener">qevor</a>
       on the side — an AI diagnostic platform for field service technicians.
     </p>
     <p>
@@ -285,14 +250,6 @@
       </li>
     </ul>
 
-    <h2>agent log</h2>
-    <p style="font-size: 12px; color: var(--ink-soft); margin-bottom: 10px;">
-      live signal from the lab. updated daily by an agent.
-    </p>
-    <div class="agent-log" id="agent-log-en">
-      <div class="log-line"><span class="log-time">loading…</span><span class="log-msg">fetching latest activity</span></div>
-    </div>
-
   </div>
 
 
@@ -301,8 +258,8 @@
 
     <h2>now</h2>
     <p>
-      field service engineer chez <a href="https://www.technogym.com" target="_blank" rel="noopener">Technogym</a> France
-      depuis septembre 2025, sur l'Île-de-France. construit <a href="https://qevor.ai" target="_blank" rel="noopener">qevor</a>
+      field service engineer chez <a href="https://www.technogym.com" target="_blank" rel="noopener">Technogym</a> France,
+      sur l'Île-de-France. construit <a href="https://qevor.ai" target="_blank" rel="noopener">qevor</a>
       en parallèle — une plateforme de diagnostic IA pour techniciens field service.
     </p>
     <p>
@@ -366,14 +323,6 @@
       </li>
     </ul>
 
-    <h2>agent log</h2>
-    <p style="font-size: 12px; color: var(--ink-soft); margin-bottom: 10px;">
-      signal live depuis le lab. mis à jour quotidiennement par un agent.
-    </p>
-    <div class="agent-log" id="agent-log-fr">
-      <div class="log-line"><span class="log-time">loading…</span><span class="log-msg">récupération de l'activité récente</span></div>
-    </div>
-
   </div>
 
 
@@ -408,54 +357,6 @@
       try { saved = localStorage.getItem('lang') || 'en'; } catch (e) {}
       if (saved === 'fr') setLang('fr');
     })();
-
-    // AGENT LOG — fetches agent-log.json and renders it.
-    // The JSON is updated daily by a GitHub Action (.github/workflows/refresh-agent-log.yml).
-    async function loadAgentLog() {
-      try {
-        const res = await fetch('agent-log.json?t=' + Date.now());
-        if (!res.ok) throw new Error('fetch failed');
-        const data = await res.json();
-        render(data);
-      } catch (e) {
-        const fallback = {
-          updated_at: 'pending',
-          updated_at_fr: 'en attente',
-          lines: [
-            { time: '—', msg_en: 'agent log will appear here once the action runs', msg_fr: 'le log apparaîtra ici dès que l\'action tourne' }
-          ]
-        };
-        render(fallback);
-      }
-    }
-
-    function render(data) {
-      ['en', 'fr'].forEach(lang => {
-        const el = document.getElementById('agent-log-' + lang);
-        if (!el) return;
-        const lines = (data.lines || []).map(line => `
-          <div class="log-line">
-            <span class="log-time">${escape(line.time || '')}</span>
-            <span class="log-msg">${escape(line['msg_' + lang] || line.msg_en || '')}</span>
-          </div>
-        `).join('');
-        const updated = lang === 'fr'
-          ? `dernière maj : ${escape(data.updated_at_fr || data.updated_at || '')}`
-          : `last update: ${escape(data.updated_at || '')}`;
-        const sourceLink = lang === 'fr'
-          ? `source : <a href="https://github.com/enyolanev-bit/enyolanev-bit.github.io/blob/main/agent-log.json">agent-log.json</a>`
-          : `source: <a href="https://github.com/enyolanev-bit/enyolanev-bit.github.io/blob/main/agent-log.json">agent-log.json</a>`;
-        el.innerHTML = lines + `<div class="log-meta">${updated} · ${sourceLink}</div>`;
-      });
-    }
-
-    function escape(s) {
-      return String(s).replace(/[&<>"']/g, c => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-      }[c]));
-    }
-
-    loadAgentLog();
   </script>
 
 </body>
