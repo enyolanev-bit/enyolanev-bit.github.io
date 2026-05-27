@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Nevil Enyola</title>
+<meta name="description" content="Field service engineer and AI builder. Paris / Île-de-France." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --ink-soft: #6b6b6b;
+    --ink-faint: #b8b8b8;
+    --bg: #fbfaf7;
+    --rule: #e8e3da;
+    --link: #1a1a1a;
+    --accent: #3b6ea5;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 14px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 80px 28px 120px;
+  }
+
+  /* lang switch top-right */
+  .lang-switch {
+    position: fixed;
+    top: 24px;
+    right: 28px;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    user-select: none;
+    z-index: 10;
+  }
+  .lang-switch button {
+    background: none;
+    border: none;
+    padding: 4px 2px;
+    cursor: pointer;
+    font: inherit;
+    color: var(--ink-soft);
+    text-transform: inherit;
+    letter-spacing: inherit;
+    transition: color 0.15s;
+  }
+  .lang-switch button:hover { color: var(--ink); }
+  .lang-switch button.active { color: var(--ink); }
+  .lang-switch .sep { padding: 0 6px; color: var(--ink-faint); }
+
+  /* name */
+  h1 {
+    font-weight: 500;
+    font-size: 22px;
+    letter-spacing: -0.01em;
+    margin-bottom: 28px;
+  }
+
+  /* photo placeholder */
+  .photo {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: #ede8df;
+    margin-bottom: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-faint);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  /* section titles */
+  h2 {
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    font-weight: 500;
+    color: var(--ink-soft);
+    margin: 48px 0 14px;
+  }
+  h2:first-of-type { margin-top: 0; }
+
+  /* paragraphs */
+  p { margin-bottom: 14px; }
+  p:last-child { margin-bottom: 0; }
+
+  /* lists */
+  ul { list-style: none; }
+  ul li {
+    margin-bottom: 14px;
+    padding-left: 14px;
+    position: relative;
+  }
+  ul li::before {
+    content: "·";
+    position: absolute;
+    left: 0;
+    color: var(--ink-soft);
+  }
+
+  /* links */
+  a {
+    color: var(--link);
+    text-decoration: underline;
+    text-decoration-color: var(--ink-faint);
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+    transition: text-decoration-color 0.15s;
+  }
+  a:hover { text-decoration-color: var(--ink); }
+
+  /* hide inactive language */
+  [data-lang]:not(.active) { display: none; }
+
+  /* social icons */
+  .social {
+    display: flex;
+    gap: 14px;
+    margin-top: 56px;
+    margin-bottom: 18px;
+  }
+  .social a {
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-soft);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .social a:hover { color: var(--ink); }
+  .social svg { width: 100%; height: 100%; fill: currentColor; }
+
+  /* email */
+  .email { color: var(--ink); }
+
+  /* AGENT LOG — the differentiator */
+  .agent-log {
+    margin-top: 14px;
+    padding: 18px 18px 16px;
+    background: #f4f1ea;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    font-size: 12.5px;
+    line-height: 1.7;
+  }
+  .agent-log .log-line {
+    color: var(--ink-soft);
+    display: flex;
+    gap: 12px;
+  }
+  .agent-log .log-time {
+    color: var(--ink-faint);
+    flex-shrink: 0;
+    min-width: 78px;
+  }
+  .agent-log .log-msg { color: var(--ink); }
+  .agent-log .log-meta {
+    color: var(--ink-faint);
+    font-size: 11px;
+    margin-top: 12px;
+    border-top: 1px dashed var(--rule);
+    padding-top: 10px;
+  }
+  .agent-log .log-meta a {
+    color: var(--ink-soft);
+    text-decoration-color: var(--ink-faint);
+  }
+
+  /* mobile */
+  @media (max-width: 620px) {
+    body { padding: 56px 20px 80px; font-size: 13px; }
+    h1 { font-size: 19px; }
+    .photo { width: 80px; height: 80px; margin-bottom: 40px; }
+    .lang-switch { top: 16px; right: 18px; font-size: 10px; }
+    .agent-log { padding: 14px; font-size: 11.5px; }
+    .agent-log .log-time { min-width: 64px; }
+  }
+</style>
+</head>
+
+<body>
+
+  <!-- LANGUAGE SWITCH -->
+  <nav class="lang-switch" aria-label="language">
+    <button id="btn-en" class="active" onclick="setLang('en')">EN</button>
+    <span class="sep">/</span>
+    <button id="btn-fr" onclick="setLang('fr')">FR</button>
+  </nav>
+
+  <h1>nevil enyola</h1>
+
+  <div class="photo">photo</div>
+
+
+  <!-- ====== ENGLISH ====== -->
+  <div data-lang="en" class="active">
+
+    <h2>now</h2>
+    <p>
+      field service engineer at <a href="https://www.technogym.com" target="_blank" rel="noopener">Technogym</a> France
+      since September 2025, covering Île-de-France. building <a href="https://qevor.ai" target="_blank" rel="noopener">qevor</a>
+      on the side — an AI diagnostic platform for field service technicians.
+    </p>
+    <p>
+      also running ENYOLAB, a solo AI hardware lab. agents on disk, instruments on the bench, sessions in markdown.
+    </p>
+
+    <h2>background</h2>
+    <p>
+      industrial maintenance vocational degree (Bac pro MEI, Lycée Paul Belmondo, sports boarding school).
+      then BTS Industrial Technician Assistant (ATI) at Lycée Jacquard — first year in alternance, second year full-time
+      to consolidate fundamentals.
+    </p>
+    <p>
+      AI training at MIT Professional Education before joining Technogym.
+    </p>
+
+    <h2>previously</h2>
+    <ul>
+      <li>
+        <strong>Eurotec Dental</strong> — exclusive French distributor of A-dec equipment.
+        roughly seven years of presence: vocational degree internships and school breaks, BTS alternance year,
+        then 11 months of full-time CDI as assistant technical engineer / workshop technician / field technician.
+        designed and built a combined pneumatic + electrical test bench for dental units —
+        still in production use six years later.
+        <a href="https://github.com/enyolanev-bit/banc-test-2020">case study →</a>
+      </li>
+      <li>
+        <strong>Eurotec Dental × Bien-Air × A-dec</strong> — iOptima integration project (2020).
+        led the integration of a Swiss-engineered iPad-controlled instrument system with an A-dec cart;
+        worked alongside two Bien-Air engineers. exposed at ADF Paris (~27,000 visitors). details soon.
+      </li>
+      <li>
+        <strong>Henry Schein</strong> — field service engineer, 2 years and 3 months. dental equipment.
+      </li>
+    </ul>
+
+    <h2>interests</h2>
+    <p>
+      the intersection of hardware and software in industrial settings. field service tooling.
+      test benches, instrumentation, structured data capture from the floor. agentic workflows for
+      engineering work. MCP servers and the layer that connects domain expertise to AI systems.
+      edge inference. anti-hallucination patterns in production. things that work in the workshop
+      before they work in the demo.
+    </p>
+
+    <h2>selected work</h2>
+    <ul>
+      <li>
+        <a href="https://github.com/enyolanev-bit/apte-toolkit">apte-toolkit</a> —
+        functional analysis toolkit (APTE method) for hardware, test benches, embedded projects.
+        methodology, template, real filled example, CLI scaffold.
+      </li>
+      <li>
+        <a href="https://github.com/enyolanev-bit/banc-test-2020">banc-test-2020</a> —
+        anonymized case study of the unified test bench. runnable demo: parser → SQLite → CLI dashboard.
+        companion to apte-toolkit.
+      </li>
+      <li>
+        <a href="https://qevor.ai">qevor</a> — AI diagnostic platform for field service.
+        in private build, not yet public.
+      </li>
+    </ul>
+
+    <h2>agent log</h2>
+    <p style="font-size: 12px; color: var(--ink-soft); margin-bottom: 10px;">
+      live signal from the lab. updated daily by an agent.
+    </p>
+    <div class="agent-log" id="agent-log-en">
+      <div class="log-line"><span class="log-time">loading…</span><span class="log-msg">fetching latest activity</span></div>
+    </div>
+
+  </div>
+
+
+  <!-- ====== FRANÇAIS ====== -->
+  <div data-lang="fr">
+
+    <h2>now</h2>
+    <p>
+      field service engineer chez <a href="https://www.technogym.com" target="_blank" rel="noopener">Technogym</a> France
+      depuis septembre 2025, sur l'Île-de-France. construit <a href="https://qevor.ai" target="_blank" rel="noopener">qevor</a>
+      en parallèle — une plateforme de diagnostic IA pour techniciens field service.
+    </p>
+    <p>
+      je fais aussi tourner ENYOLAB, un lab AI hardware solo. agents sur disque, instruments sur le banc, sessions en markdown.
+    </p>
+
+    <h2>background</h2>
+    <p>
+      bac pro Maintenance des Équipements Industriels (MEI), Lycée Paul Belmondo, internat sportif.
+      puis BTS Assistance Technique d'Ingénieur (ATI) au Lycée Jacquard — première année en alternance,
+      deuxième année en initiale pour consolider les fondamentaux.
+    </p>
+    <p>
+      formation IA au MIT Professional Education avant de rejoindre Technogym.
+    </p>
+
+    <h2>previously</h2>
+    <ul>
+      <li>
+        <strong>Eurotec Dental</strong> — distributeur exclusif français du matériel A-dec.
+        environ sept ans de présence : stages de bac pro et vacances scolaires, année d'alternance BTS,
+        puis 11 mois de CDI comme assistant technique d'ingénieur / technicien atelier / technicien itinérant.
+        conception et réalisation d'un banc de test combiné pneumatique + électrique pour units dentaires —
+        toujours en production six ans plus tard.
+        <a href="https://github.com/enyolanev-bit/banc-test-2020">case study →</a>
+      </li>
+      <li>
+        <strong>Eurotec Dental × Bien-Air × A-dec</strong> — projet d'intégration iOptima (2020).
+        intégration d'un système d'instruments suisse contrôlé par iPad dans un cart A-dec ;
+        travail aux côtés de deux ingénieurs Bien-Air. exposé à l'ADF Paris (~27 000 visiteurs). détails bientôt.
+      </li>
+      <li>
+        <strong>Henry Schein</strong> — field service engineer, 2 ans et 3 mois. matériel dentaire.
+      </li>
+    </ul>
+
+    <h2>interests</h2>
+    <p>
+      l'intersection hardware et software dans l'industriel. l'outillage du field service.
+      bancs de test, instrumentation, capture de données structurée depuis le terrain.
+      agentic workflows pour le travail d'ingénieur. MCP servers et la couche qui connecte
+      l'expertise métier aux systèmes IA. edge inference. patterns anti-hallucination en production.
+      les choses qui marchent dans l'atelier avant de marcher dans la démo.
+    </p>
+
+    <h2>selected work</h2>
+    <ul>
+      <li>
+        <a href="https://github.com/enyolanev-bit/apte-toolkit">apte-toolkit</a> —
+        toolkit d'analyse fonctionnelle (méthode APTE) pour hardware, bancs de test, projets embarqués.
+        méthodologie, template, exemple réel rempli, CLI scaffold.
+      </li>
+      <li>
+        <a href="https://github.com/enyolanev-bit/banc-test-2020">banc-test-2020</a> —
+        case study anonymisé du banc unifié. demo runnable : parser → SQLite → dashboard CLI.
+        companion d'apte-toolkit.
+      </li>
+      <li>
+        <a href="https://qevor.ai">qevor</a> — plateforme de diagnostic SAV par IA.
+        en build privé, pas encore public.
+      </li>
+    </ul>
+
+    <h2>agent log</h2>
+    <p style="font-size: 12px; color: var(--ink-soft); margin-bottom: 10px;">
+      signal live depuis le lab. mis à jour quotidiennement par un agent.
+    </p>
+    <div class="agent-log" id="agent-log-fr">
+      <div class="log-line"><span class="log-time">loading…</span><span class="log-msg">récupération de l'activité récente</span></div>
+    </div>
+
+  </div>
+
+
+  <!-- SOCIAL -->
+  <div class="social" aria-label="social links">
+    <a href="https://github.com/enyolanev-bit" aria-label="GitHub" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+    </a>
+    <a href="https://qevor.ai" aria-label="qevor" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0a12 12 0 1 0 0 24 12 12 0 0 0 0-24zm0 2c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2zm0 4c-3.3 0-6 2.7-6 6s2.7 6 6 6 6-2.7 6-6-2.7-6-6-6zm0 2c2.2 0 4 1.8 4 4s-1.8 4-4 4-4-1.8-4-4 1.8-4 4-4z"/></svg>
+    </a>
+  </div>
+
+  <p>
+    <a href="mailto:enyola.nv@gmail.com" class="email">enyola.nv@gmail.com</a>
+  </p>
+
+
+  <script>
+    // Language toggle (persisted in localStorage; default EN).
+    function setLang(lang) {
+      document.documentElement.lang = lang;
+      document.querySelectorAll('[data-lang]').forEach(el => {
+        el.classList.toggle('active', el.dataset.lang === lang);
+      });
+      document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+      document.getElementById('btn-fr').classList.toggle('active', lang === 'fr');
+      try { localStorage.setItem('lang', lang); } catch (e) {}
+    }
+    (function () {
+      let saved = 'en';
+      try { saved = localStorage.getItem('lang') || 'en'; } catch (e) {}
+      if (saved === 'fr') setLang('fr');
+    })();
+
+    // AGENT LOG — fetches agent-log.json and renders it.
+    // The JSON is updated daily by a GitHub Action (.github/workflows/refresh-agent-log.yml).
+    async function loadAgentLog() {
+      try {
+        const res = await fetch('agent-log.json?t=' + Date.now());
+        if (!res.ok) throw new Error('fetch failed');
+        const data = await res.json();
+        render(data);
+      } catch (e) {
+        const fallback = {
+          updated_at: 'pending',
+          updated_at_fr: 'en attente',
+          lines: [
+            { time: '—', msg_en: 'agent log will appear here once the action runs', msg_fr: 'le log apparaîtra ici dès que l\'action tourne' }
+          ]
+        };
+        render(fallback);
+      }
+    }
+
+    function render(data) {
+      ['en', 'fr'].forEach(lang => {
+        const el = document.getElementById('agent-log-' + lang);
+        if (!el) return;
+        const lines = (data.lines || []).map(line => `
+          <div class="log-line">
+            <span class="log-time">${escape(line.time || '')}</span>
+            <span class="log-msg">${escape(line['msg_' + lang] || line.msg_en || '')}</span>
+          </div>
+        `).join('');
+        const updated = lang === 'fr'
+          ? `dernière maj : ${escape(data.updated_at_fr || data.updated_at || '')}`
+          : `last update: ${escape(data.updated_at || '')}`;
+        const sourceLink = lang === 'fr'
+          ? `source : <a href="https://github.com/enyolanev-bit/enyolanev-bit.github.io/blob/main/agent-log.json">agent-log.json</a>`
+          : `source: <a href="https://github.com/enyolanev-bit/enyolanev-bit.github.io/blob/main/agent-log.json">agent-log.json</a>`;
+        el.innerHTML = lines + `<div class="log-meta">${updated} · ${sourceLink}</div>`;
+      });
+    }
+
+    function escape(s) {
+      return String(s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
+    }
+
+    loadAgentLog();
+  </script>
+
+</body>
+</html>

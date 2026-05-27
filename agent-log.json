@@ -1,0 +1,41 @@
+{
+  "updated_at": "2026-05-27",
+  "updated_at_fr": "2026-05-27",
+  "lines": [
+    {
+      "time": "2026-05-27",
+      "msg_en": "office-hours v2 — design doc for this site (Garry/Diana framework applied)",
+      "msg_fr": "office-hours v2 — design doc de ce site (framework Garry/Diana appliqué)"
+    },
+    {
+      "time": "2026-05-27",
+      "msg_en": "lab CLAUDE.md updated with 14 AI-native principles (skill/resolver/eval/DRI)",
+      "msg_fr": "CLAUDE.md du lab : 14 principes AI-native ajoutés (skill/resolver/eval/DRI)"
+    },
+    {
+      "time": "2026-05-26",
+      "msg_en": "banc-test-2020 — added tools/ runnable demo (parser → SQLite → CLI dashboard, stdlib only)",
+      "msg_fr": "banc-test-2020 — ajout tools/ runnable (parser → SQLite → dashboard CLI, stdlib seul)"
+    },
+    {
+      "time": "2026-05-26",
+      "msg_en": "apte-toolkit — added cli/apte.py to scaffold a SPEC.md in any project",
+      "msg_fr": "apte-toolkit — ajout cli/apte.py pour scaffold un SPEC.md dans n'importe quel projet"
+    },
+    {
+      "time": "2026-05-26",
+      "msg_en": "2 public repos shipped: apte-toolkit (MIT) + banc-test-2020 (CC BY)",
+      "msg_fr": "2 repos publics shippés : apte-toolkit (MIT) + banc-test-2020 (CC BY)"
+    },
+    {
+      "time": "2026-05-26",
+      "msg_en": "lab — potentiometer ADC read validated on Pico (0.000V → 3.300V, 100% amplitude)",
+      "msg_fr": "lab — lecture ADC potentiomètre validée sur Pico (0,000V → 3,300V, amplitude 100%)"
+    }
+  ],
+  "stats": {
+    "public_repos": 4,
+    "lab_agents_running": 5,
+    "last_lab_session": "2026-05-26"
+  }
+}
