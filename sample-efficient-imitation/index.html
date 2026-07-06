@@ -157,7 +157,7 @@
     </p>
     <p>The task is PushT: a Diffusion Policy pushes a T-block onto a target. Trained &amp; evaluated on AMD ROCm (Radeon AI&nbsp;PRO&nbsp;R9700).</p>
 
-    <h2>verdict — confirmed</h2>
+    <h2>preliminary result</h2>
     <table>
       <thead><tr><th>Demos</th><th>Standard</th><th>Enhanced</th><th>Δ</th></tr></thead>
       <tbody>
@@ -166,10 +166,10 @@
       </tbody>
     </table>
     <p>
-      At 200 demos, regularization buys <strong>nothing</strong> — both recipes plateau at 29%. But at 100 demos it
-      lifts success from <span class="std-t">8%</span> to <span class="enh-t">19%</span> — <strong>+11 points, ~2.4× the
-      success rate</strong>. Regularization pays exactly where the hypothesis says it should: <strong>when demonstrations
-      are scarce.</strong>
+      <strong>Preliminary evidence</strong> suggests that, under a 100-demo budget, enhanced regularization improves
+      success from <span class="std-t">8%</span> to <span class="enh-t">19%</span> (<strong>+11 pts</strong>), while
+      showing <strong>no gain at 200 demos</strong> (29% = 29%). Consistent with regularization helping most when
+      demonstrations are scarce. Single seed — a strong signal, not yet a settled claim.
     </p>
 
     <figure>
@@ -244,7 +244,7 @@
     </p>
     <p>La tâche est PushT : une Diffusion Policy pousse un bloc en T sur une cible. Entraînée &amp; évaluée sur AMD ROCm (Radeon AI&nbsp;PRO&nbsp;R9700).</p>
 
-    <h2>verdict — confirmé</h2>
+    <h2>résultat préliminaire</h2>
     <table>
       <thead><tr><th>Démos</th><th>Standard</th><th>Enhanced</th><th>Δ</th></tr></thead>
       <tbody>
@@ -253,10 +253,10 @@
       </tbody>
     </table>
     <p>
-      À 200 démos, la régularisation n'achète <strong>rien</strong> — les deux recettes plafonnent à 29%. Mais à 100
-      démos, elle fait passer le succès de <span class="std-t">8%</span> à <span class="enh-t">19%</span> —
-      <strong>+11 points, ~2,4× le taux de succès</strong>. La reg paie exactement là où l'hypothèse le prédit :
-      <strong>quand les démonstrations sont rares.</strong>
+      <strong>Évidence préliminaire :</strong> sous un budget de 100 démos, la régularisation enhanced améliore le succès
+      de <span class="std-t">8%</span> à <span class="enh-t">19%</span> (<strong>+11 pts</strong>), sans gain à
+      <strong>200 démos</strong> (29% = 29%). Cohérent avec l'idée que la régularisation aide surtout quand les
+      démonstrations sont rares. Un seul seed — signal fort, pas encore une revendication établie.
     </p>
 
     <figure>
