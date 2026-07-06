@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sample-Efficient Imitation — Nevil Enyola</title>
+<meta name="description" content="Does aggressive regularization buy sample-efficiency for imitation-learning policies? A controlled study on PushT — Diffusion Policy, trained & evaluated on AMD ROCm." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #1c1a17;
+    --ink-soft: #6b6660;
+    --ink-faint: #b8b3ac;
+    --bg: #fbfaf7;
+    --rule: #e8e3da;
+    --link: #1c1a17;
+    --std: #a6795a;   /* muted terracotta — baseline */
+    --enh: #2f5e46;   /* muted forest — enhanced (the win) */
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'EB Garamond', Georgia, 'Times New Roman', serif;
+    font-size: 19px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 80px 28px 120px;
+  }
+
+  .lang-switch {
+    position: fixed;
+    top: 24px; right: 28px;
+    font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--ink-soft); user-select: none; z-index: 10;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  .lang-switch button {
+    background: none; border: none; padding: 4px 2px; cursor: pointer;
+    font: inherit; color: var(--ink-soft); text-transform: inherit; letter-spacing: inherit;
+    transition: color 0.15s;
+  }
+  .lang-switch button:hover, .lang-switch button.active { color: var(--ink); }
+  .lang-switch .sep { padding: 0 6px; color: var(--ink-faint); }
+
+  .back {
+    font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--ink-soft); display: inline-block; margin-bottom: 40px;
+    text-decoration: none;
+  }
+  .back:hover { color: var(--ink); }
+
+  h1 { font-weight: 500; font-size: 28px; letter-spacing: -0.01em; margin-bottom: 10px; text-wrap: balance; }
+  .thesis { color: var(--ink-soft); font-style: italic; margin-bottom: 8px; }
+
+  h2 {
+    text-transform: uppercase; font-size: 11px; letter-spacing: 0.18em; font-weight: 400;
+    color: var(--ink-soft); margin: 52px 0 14px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  p { margin-bottom: 16px; }
+  p:last-child { margin-bottom: 0; }
+  strong { font-weight: 500; }
+  .std-t { color: var(--std); font-weight: 500; }
+  .enh-t { color: var(--enh); font-weight: 500; }
+
+  a { color: var(--link); text-decoration: underline; text-decoration-color: var(--ink-faint);
+      text-underline-offset: 3px; text-decoration-thickness: 1px; transition: text-decoration-color 0.15s; }
+  a:hover { text-decoration-color: var(--ink); }
+
+  [data-lang]:not(.active) { display: none; }
+
+  /* verdict table */
+  table { border-collapse: collapse; width: 100%; margin: 8px 0 4px; font-variant-numeric: tabular-nums; }
+  th, td { text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--rule); }
+  th:first-child, td:first-child { text-align: left; }
+  thead th { font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 11px;
+             letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); font-weight: 400; }
+  .delta-pos { color: var(--enh); font-weight: 500; }
+
+  /* chart */
+  figure { margin: 22px 0 8px; }
+  .chart { width: 100%; height: auto; overflow: visible; }
+  .chart .grid { stroke: var(--rule); stroke-width: 1; }
+  .chart .tick { fill: var(--ink-faint); font-family: -apple-system, sans-serif; font-size: 11px; }
+  .chart .lbl  { fill: var(--ink-soft); font-family: -apple-system, sans-serif; font-size: 11px; letter-spacing: 0.04em; }
+  .chart .ln-std { fill: none; stroke: var(--std); stroke-width: 2; stroke-dasharray: 4 3; }
+  .chart .ln-enh { fill: none; stroke: var(--enh); stroke-width: 2.5; }
+  .chart .dot-std { fill: var(--std); } .chart .dot-enh { fill: var(--enh); }
+  .chart .val { font-family: -apple-system, sans-serif; font-size: 12px; font-weight: 600; }
+  .chart .val-std { fill: var(--std); } .chart .val-enh { fill: var(--enh); }
+  figcaption { color: var(--ink-soft); font-size: 15px; font-style: italic; margin-top: 6px; }
+
+  /* rollouts */
+  .rolls { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 18px; margin: 20px 0 4px; }
+  .roll { margin: 0; }
+  .roll img { width: 100%; border-radius: 6px; border: 1px solid var(--rule); display: block; background: #fff; }
+  .roll figcaption { font-family: -apple-system, sans-serif; font-size: 11px; letter-spacing: 0.03em;
+                     text-transform: uppercase; font-style: normal; color: var(--ink-soft); margin-top: 8px; }
+  .roll .solved { color: var(--enh); }
+
+  ul { list-style: none; }
+  ul li { margin-bottom: 10px; padding-left: 18px; position: relative; }
+  ul li::before { content: "•"; position: absolute; left: 4px; color: var(--ink-soft); }
+
+  dl.spec { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; margin: 6px 0; }
+  dl.spec div { display: flex; justify-content: space-between; border-bottom: 1px solid var(--rule); padding-bottom: 6px; }
+  dl.spec dt { color: var(--ink-soft); }
+  dl.spec dd { font-variant-numeric: tabular-nums; }
+
+  .note { color: var(--ink-soft); font-size: 16px; border-left: 2px solid var(--rule); padding-left: 14px; }
+
+  @media (max-width: 620px) {
+    body { padding: 56px 22px 80px; font-size: 18px; }
+    h1 { font-size: 25px; }
+    .lang-switch { top: 16px; right: 18px; font-size: 11px; }
+    dl.spec { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+
+<body>
+
+  <nav class="lang-switch" aria-label="language">
+    <button id="btn-en" class="active" onclick="setLang('en')">EN</button>
+    <span class="sep">/</span>
+    <button id="btn-fr" onclick="setLang('fr')">FR</button>
+  </nav>
+
+  <a class="back" href="../">← Nevil Enyola</a>
+
+  <!-- ====== ENGLISH ====== -->
+  <div data-lang="en" class="active">
+    <h1>Sample-efficient imitation</h1>
+    <p class="thesis">Under a small budget of demonstrations, does aggressive regularization buy sample-efficiency for imitation-learning policies?</p>
+
+    <h2>the question</h2>
+    <p>
+      Imitation learning is data-scarce by nature: every demonstration is a human teleoperating the robot —
+      slow and expensive. So the field gains a lot from policies that reach the same performance with
+      <em>fewer</em> demos. Inspired by Konwoo et al. on data-constrained pre-training, this study asks whether
+      aggressive regularization buys that data-efficiency — and, crucially, whether it helps most when data is scarce.
+    </p>
+    <p>The task is PushT: a Diffusion Policy pushes a T-block onto a target. Trained &amp; evaluated on AMD ROCm (Radeon AI&nbsp;PRO&nbsp;R9700).</p>
+
+    <h2>verdict — confirmed</h2>
+    <table>
+      <thead><tr><th>Demos</th><th>Standard</th><th>Enhanced</th><th>Δ</th></tr></thead>
+      <tbody>
+        <tr><td>200 &nbsp;<span style="color:var(--ink-faint)">data-rich</span></td><td>29%</td><td>29%</td><td>0 pts</td></tr>
+        <tr><td>100 &nbsp;<span style="color:var(--ink-faint)">data-scarce</span></td><td>8%</td><td><span class="enh-t">19%</span></td><td class="delta-pos">+11 pts</td></tr>
+      </tbody>
+    </table>
+    <p>
+      At 200 demos, regularization buys <strong>nothing</strong> — both recipes plateau at 29%. But at 100 demos it
+      lifts success from <span class="std-t">8%</span> to <span class="enh-t">19%</span> — <strong>+11 points, ~2.4× the
+      success rate</strong>. Regularization pays exactly where the hypothesis says it should: <strong>when demonstrations
+      are scarce.</strong>
+    </p>
+
+    <figure>
+      <svg class="chart" viewBox="0 0 560 300" role="img" aria-label="Success rate versus number of demonstrations">
+        <line class="grid" x1="48" y1="256" x2="536" y2="256"/>
+        <line class="grid" x1="48" y1="188.6" x2="536" y2="188.6"/>
+        <line class="grid" x1="48" y1="121.1" x2="536" y2="121.1"/>
+        <line class="grid" x1="48" y1="53.7" x2="536" y2="53.7"/>
+        <text class="tick" x="40" y="260" text-anchor="end">0</text>
+        <text class="tick" x="40" y="192" text-anchor="end">10</text>
+        <text class="tick" x="40" y="125" text-anchor="end">20</text>
+        <text class="tick" x="40" y="57" text-anchor="end">30%</text>
+        <text class="tick" x="170" y="278" text-anchor="middle">100 demos</text>
+        <text class="tick" x="414" y="278" text-anchor="middle">200 demos</text>
+        <line x1="56" y1="26" x2="76" y2="26" stroke="#2f5e46" stroke-width="2.5"/>
+        <text class="lbl" x="82" y="30" fill="#2f5e46">enhanced (+ reg)</text>
+        <line x1="56" y1="42" x2="76" y2="42" stroke="#a6795a" stroke-width="2" stroke-dasharray="4 3"/>
+        <text class="lbl" x="82" y="46" fill="#a6795a">standard</text>
+        <line x1="150" y1="127.9" x2="150" y2="202.1" stroke="#2f5e46" stroke-width="1"/>
+        <text class="val-enh" x="144" y="169" text-anchor="end" font-size="11">+11</text>
+        <polyline class="ln-std" points="170,202.1 414,60.5"/>
+        <polyline class="ln-enh" points="170,127.9 414,60.5"/>
+        <circle class="dot-std" cx="170" cy="202.1" r="4.5"/>
+        <circle class="dot-enh" cx="170" cy="127.9" r="4.5"/>
+        <circle class="dot-std" cx="414" cy="60.5" r="4.5"/>
+        <circle class="dot-enh" cx="414" cy="60.5" r="4.5"/>
+        <text class="val val-std" x="178" y="216" text-anchor="start">8%</text>
+        <text class="val val-enh" x="178" y="124" text-anchor="start">19%</text>
+        <text class="val" x="414" y="48" text-anchor="middle" fill="#6b6660">29%</text>
+      </svg>
+      <figcaption>Success rate vs. number of demonstrations. The enhanced curve sits above standard exactly where data is scarce — and they converge when data is plentiful.</figcaption>
+    </figure>
+
+    <h2>the policy solving the task</h2>
+    <p>Real evaluation rollouts. The pusher (blue) drives the grey block onto the green target; episodes end the instant coverage crosses 95%.</p>
+    <div class="rolls">
+      <figure class="roll"><img src="rollout-enh-100.gif" alt="enhanced, 100 demos, solved" loading="lazy"><figcaption><span class="solved">solved</span> · enhanced · 100 demos</figcaption></figure>
+      <figure class="roll"><img src="rollout-enh-200.gif" alt="enhanced, 200 demos, solved" loading="lazy"><figcaption><span class="solved">solved</span> · enhanced · 200 demos</figcaption></figure>
+      <figure class="roll"><img src="rollout-std-200.gif" alt="standard, 200 demos, solved" loading="lazy"><figcaption><span class="solved">solved</span> · standard · 200 demos</figcaption></figure>
+    </div>
+
+    <h2>method</h2>
+    <dl class="spec">
+      <div><dt>Policy</dt><dd>Diffusion Policy</dd></div>
+      <div><dt>Task</dt><dd>PushT (sim)</dd></div>
+      <div><dt>Steps / run</dt><dd>150,000</dd></div>
+      <div><dt>Eval episodes</dt><dd>100</dd></div>
+      <div><dt>Seed</dt><dd>0</dd></div>
+      <div><dt>Hardware</dt><dd>R9700 · ROCm</dd></div>
+    </dl>
+    <p><strong>standard</strong> = LeRobot defaults. <strong>enhanced</strong> = weight decay 1e-3 + image-transform augmentation.</p>
+    <p class="note">Honest scope: single seed, one GPU, and a baseline that plateaus below the published reference (~65%) — the remaining gap is batch size (8 vs ~64). Enough to show the signal, not yet to publish.</p>
+
+    <h2>links</h2>
+    <ul>
+      <li><a href="https://github.com/enyolanev-bit/sample-efficient-imitation">code &amp; full write-up →</a> (reproducible, MIT)</li>
+      <li><a href="https://enyolanev-bit-sample-efficient-imitation.static.hf.space">interactive results (HF Space) →</a></li>
+    </ul>
+  </div>
+
+  <!-- ====== FRANÇAIS ====== -->
+  <div data-lang="fr">
+    <h1>Sample-efficient imitation</h1>
+    <p class="thesis">Sous un petit budget de démonstrations, la régularisation agressive achète-t-elle de l'efficacité-donnée aux politiques d'imitation ?</p>
+
+    <h2>la question</h2>
+    <p>
+      L'imitation est data-scarce par nature : chaque démo, c'est un humain qui téléopère le robot — lent et coûteux.
+      D'où l'intérêt de politiques qui atteignent la même performance avec <em>moins</em> de démos. Inspirée de Konwoo
+      et al. (pré-entraînement sous contrainte de données), cette étude demande si la régularisation agressive achète
+      cette efficacité — et surtout si elle aide le plus quand les données sont rares.
+    </p>
+    <p>La tâche est PushT : une Diffusion Policy pousse un bloc en T sur une cible. Entraînée &amp; évaluée sur AMD ROCm (Radeon AI&nbsp;PRO&nbsp;R9700).</p>
+
+    <h2>verdict — confirmé</h2>
+    <table>
+      <thead><tr><th>Démos</th><th>Standard</th><th>Enhanced</th><th>Δ</th></tr></thead>
+      <tbody>
+        <tr><td>200 &nbsp;<span style="color:var(--ink-faint)">data-rich</span></td><td>29%</td><td>29%</td><td>0 pt</td></tr>
+        <tr><td>100 &nbsp;<span style="color:var(--ink-faint)">data-scarce</span></td><td>8%</td><td><span class="enh-t">19%</span></td><td class="delta-pos">+11 pts</td></tr>
+      </tbody>
+    </table>
+    <p>
+      À 200 démos, la régularisation n'achète <strong>rien</strong> — les deux recettes plafonnent à 29%. Mais à 100
+      démos, elle fait passer le succès de <span class="std-t">8%</span> à <span class="enh-t">19%</span> —
+      <strong>+11 points, ~2,4× le taux de succès</strong>. La reg paie exactement là où l'hypothèse le prédit :
+      <strong>quand les démonstrations sont rares.</strong>
+    </p>
+
+    <figure>
+      <svg class="chart" viewBox="0 0 560 300" role="img" aria-label="Taux de succès versus nombre de démonstrations">
+        <line class="grid" x1="48" y1="256" x2="536" y2="256"/>
+        <line class="grid" x1="48" y1="188.6" x2="536" y2="188.6"/>
+        <line class="grid" x1="48" y1="121.1" x2="536" y2="121.1"/>
+        <line class="grid" x1="48" y1="53.7" x2="536" y2="53.7"/>
+        <text class="tick" x="40" y="260" text-anchor="end">0</text>
+        <text class="tick" x="40" y="192" text-anchor="end">10</text>
+        <text class="tick" x="40" y="125" text-anchor="end">20</text>
+        <text class="tick" x="40" y="57" text-anchor="end">30%</text>
+        <text class="tick" x="170" y="278" text-anchor="middle">100 démos</text>
+        <text class="tick" x="414" y="278" text-anchor="middle">200 démos</text>
+        <line x1="56" y1="26" x2="76" y2="26" stroke="#2f5e46" stroke-width="2.5"/>
+        <text class="lbl" x="82" y="30" fill="#2f5e46">enhanced (+ reg)</text>
+        <line x1="56" y1="42" x2="76" y2="42" stroke="#a6795a" stroke-width="2" stroke-dasharray="4 3"/>
+        <text class="lbl" x="82" y="46" fill="#a6795a">standard</text>
+        <line x1="150" y1="127.9" x2="150" y2="202.1" stroke="#2f5e46" stroke-width="1"/>
+        <text class="val-enh" x="144" y="169" text-anchor="end" font-size="11">+11</text>
+        <polyline class="ln-std" points="170,202.1 414,60.5"/>
+        <polyline class="ln-enh" points="170,127.9 414,60.5"/>
+        <circle class="dot-std" cx="170" cy="202.1" r="4.5"/>
+        <circle class="dot-enh" cx="170" cy="127.9" r="4.5"/>
+        <circle class="dot-std" cx="414" cy="60.5" r="4.5"/>
+        <circle class="dot-enh" cx="414" cy="60.5" r="4.5"/>
+        <text class="val val-std" x="178" y="216" text-anchor="start">8%</text>
+        <text class="val val-enh" x="178" y="124" text-anchor="start">19%</text>
+        <text class="val" x="414" y="48" text-anchor="middle" fill="#6b6660">29%</text>
+      </svg>
+      <figcaption>Taux de succès vs nombre de démonstrations. La courbe enhanced dépasse standard exactement là où les données sont rares — et elles convergent quand les données sont abondantes.</figcaption>
+    </figure>
+
+    <h2>la politique qui résout la tâche</h2>
+    <p>Vraies vidéos d'évaluation. Le pousseur (bleu) amène le bloc gris sur la cible verte ; l'épisode s'arrête dès que le recouvrement dépasse 95%.</p>
+    <div class="rolls">
+      <figure class="roll"><img src="rollout-enh-100.gif" alt="enhanced, 100 démos, résolu" loading="lazy"><figcaption><span class="solved">résolu</span> · enhanced · 100 démos</figcaption></figure>
+      <figure class="roll"><img src="rollout-enh-200.gif" alt="enhanced, 200 démos, résolu" loading="lazy"><figcaption><span class="solved">résolu</span> · enhanced · 200 démos</figcaption></figure>
+      <figure class="roll"><img src="rollout-std-200.gif" alt="standard, 200 démos, résolu" loading="lazy"><figcaption><span class="solved">résolu</span> · standard · 200 démos</figcaption></figure>
+    </div>
+
+    <h2>méthode</h2>
+    <dl class="spec">
+      <div><dt>Politique</dt><dd>Diffusion Policy</dd></div>
+      <div><dt>Tâche</dt><dd>PushT (sim)</dd></div>
+      <div><dt>Steps / run</dt><dd>150 000</dd></div>
+      <div><dt>Épisodes éval</dt><dd>100</dd></div>
+      <div><dt>Seed</dt><dd>0</dd></div>
+      <div><dt>Matériel</dt><dd>R9700 · ROCm</dd></div>
+    </dl>
+    <p><strong>standard</strong> = défauts LeRobot. <strong>enhanced</strong> = weight decay 1e-3 + data augmentation.</p>
+    <p class="note">Portée honnête : un seed, un GPU, une baseline sous la référence publiée (~65%) — l'écart restant = le batch size (8 vs ~64). Assez pour montrer le signal, pas encore pour publier.</p>
+
+    <h2>liens</h2>
+    <ul>
+      <li><a href="https://github.com/enyolanev-bit/sample-efficient-imitation">code &amp; write-up complet →</a> (reproductible, MIT)</li>
+      <li><a href="https://enyolanev-bit-sample-efficient-imitation.static.hf.space">résultats interactifs (HF Space) →</a></li>
+    </ul>
+  </div>
+
+  <script>
+    function setLang(lang) {
+      document.documentElement.lang = lang;
+      document.querySelectorAll('[data-lang]').forEach(el => el.classList.toggle('active', el.dataset.lang === lang));
+      document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+      document.getElementById('btn-fr').classList.toggle('active', lang === 'fr');
+      try { localStorage.setItem('lang', lang); } catch (e) {}
+    }
+    (function () {
+      let saved = 'en';
+      try { saved = localStorage.getItem('lang') || 'en'; } catch (e) {}
+      if (saved === 'fr') setLang('fr');
+    })();
+  </script>
+</body>
+</html>
