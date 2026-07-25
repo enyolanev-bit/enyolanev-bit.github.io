@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SparePart | Offline drone diagnostics with Gemma 4</title>
+  <meta name="description" content="A field repair workflow for damaged drones: Gemma 4 vision runs locally, Pydantic validates every output, and unsafe inputs are refused.">
+  <link rel="canonical" href="https://enyolanev-bit.github.io/sparepart/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://enyolanev-bit.github.io/sparepart/">
+  <meta property="og:title" content="SparePart | Offline drone diagnostics with Gemma 4">
+  <meta property="og:description" content="Photo to validated repair guidance on the machine. No cloud call in the field path.">
+  <meta property="og:image" content="https://enyolanev-bit.github.io/sparepart/product-desktop.jpg">
+  <meta property="og:image:width" content="1440">
+  <meta property="og:image:height" content="887">
+  <meta property="og:image:alt" content="SparePart guided drone inspection interface">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="SparePart | Offline drone diagnostics with Gemma 4">
+  <meta name="twitter:description" content="A measured, local-first drone repair workflow built for field teams.">
+  <meta name="twitter:image" content="https://enyolanev-bit.github.io/sparepart/product-desktop.jpg">
+
+  <style>
+    :root {
+      --bg: #000;
+      --panel: #08090a;
+      --line: #292c30;
+      --line-strong: #50545a;
+      --text: #fff;
+      --muted: #aaa;
+      --faint: #777;
+      --green: #3fcb7f;
+      --orange: #ff9b52;
+      --red: #ff5c52;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { background: var(--bg); scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    a {
+      color: inherit;
+      text-decoration-color: var(--line-strong);
+      text-underline-offset: 4px;
+    }
+    a:hover { text-decoration-color: var(--text); }
+    img { display: block; max-width: 100%; }
+
+    .shell {
+      width: min(1328px, calc(100% - 48px));
+      margin: 0 auto;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 66px;
+      border-bottom: 1px solid var(--line);
+      font: 700 12px/1 var(--mono);
+      text-transform: uppercase;
+    }
+    .topbar__brand {
+      color: var(--text);
+      text-decoration: none;
+    }
+    .topbar__links {
+      display: flex;
+      gap: 20px;
+      color: var(--muted);
+    }
+
+    .intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(260px, .6fr);
+      gap: 64px;
+      align-items: end;
+      padding: 64px 0 50px;
+    }
+    .kicker,
+    .section-label,
+    .metric span,
+    .boundary strong,
+    .step b {
+      color: var(--muted);
+      font: 700 11px/1.3 var(--mono);
+      text-transform: uppercase;
+    }
+    .kicker { color: var(--green); }
+    h1 {
+      margin: 13px 0 0;
+      font: 400 72px/.92 var(--display);
+      letter-spacing: 0;
+    }
+    .intro__copy {
+      margin: 0;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.5;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+    .action {
+      display: inline-flex;
+      align-items: center;
+      min-height: 42px;
+      padding: 0 14px;
+      border: 1px solid var(--line-strong);
+      border-radius: 3px;
+      font: 700 12px/1 var(--mono);
+      text-decoration: none;
+    }
+    .action--primary {
+      background: var(--text);
+      color: var(--bg);
+      border-color: var(--text);
+    }
+    .action:hover { border-color: var(--text); }
+
+    .product {
+      margin: 0;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .product img {
+      width: 100%;
+      aspect-ratio: 1440 / 887;
+      object-fit: cover;
+      object-position: top center;
+    }
+    .product figcaption {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 13px 0;
+      color: var(--faint);
+      font: 11px/1.45 var(--mono);
+    }
+
+    .proof-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-bottom: 1px solid var(--line);
+    }
+    .proof-strip div {
+      min-height: 92px;
+      padding: 20px 18px 18px 0;
+    }
+    .proof-strip div + div {
+      padding-left: 18px;
+      border-left: 1px solid var(--line);
+    }
+    .proof-strip span {
+      display: block;
+      color: var(--faint);
+      font: 700 10px/1.2 var(--mono);
+      text-transform: uppercase;
+    }
+    .proof-strip strong {
+      display: block;
+      margin-top: 10px;
+      font-size: 15px;
+    }
+    .proof-strip .is-ok strong { color: var(--green); }
+
+    .band {
+      padding: 76px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .band-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, .65fr);
+      gap: 64px;
+      align-items: start;
+      margin-bottom: 38px;
+    }
+    h2 {
+      max-width: 760px;
+      margin: 10px 0 0;
+      font: 400 44px/1.04 var(--display);
+      letter-spacing: 0;
+    }
+    .band-head p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .step {
+      min-height: 205px;
+      padding: 22px 20px 24px 0;
+    }
+    .step + .step {
+      padding-left: 20px;
+      border-left: 1px solid var(--line);
+    }
+    .step b { color: var(--orange); }
+    .step h3 {
+      margin: 34px 0 8px;
+      font-size: 18px;
+    }
+    .step p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .metric {
+      min-height: 180px;
+      padding: 24px 20px 24px 0;
+    }
+    .metric + .metric {
+      padding-left: 20px;
+      border-left: 1px solid var(--line);
+    }
+    .metric strong {
+      display: block;
+      margin: 30px 0 8px;
+      font: 400 48px/1 var(--display);
+    }
+    .metric p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .boundaries {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-top: 1px solid var(--line);
+    }
+    .boundary {
+      padding: 19px 20px 19px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .boundary:nth-child(even) {
+      padding-left: 20px;
+      border-left: 1px solid var(--line);
+    }
+    .boundary strong { color: var(--orange); }
+    .boundary.is-stop strong { color: var(--red); }
+    .boundary p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .guided {
+      display: grid;
+      grid-template-columns: minmax(260px, .55fr) minmax(0, 1fr);
+      gap: 56px;
+      align-items: center;
+    }
+    .guided__copy p {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .guided__copy .disclosure {
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+      color: var(--orange);
+      font: 12px/1.55 var(--mono);
+    }
+    .guided__visual {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 210px;
+      gap: 18px;
+      align-items: end;
+    }
+    .guided__visual img {
+      width: 100%;
+      border: 1px solid var(--line);
+    }
+    .guided__visual img:last-child {
+      max-height: 455px;
+      object-fit: cover;
+      object-position: top;
+    }
+
+    .close {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 32px;
+      align-items: end;
+    }
+    .close p {
+      max-width: 710px;
+      margin: 14px 0 0;
+      color: var(--muted);
+    }
+
+    footer {
+      padding: 28px 0 46px;
+      color: var(--faint);
+      font: 11px/1.55 var(--mono);
+    }
+
+    @media (max-width: 900px) {
+      .intro,
+      .band-head,
+      .guided,
+      .close {
+        grid-template-columns: 1fr;
+        gap: 28px;
+      }
+      .steps,
+      .metrics,
+      .proof-strip {
+        grid-template-columns: 1fr 1fr;
+      }
+      .proof-strip div:nth-child(3) { border-left: 0; }
+      .proof-strip div:nth-child(n + 3) { border-top: 1px solid var(--line); }
+      .guided__visual { grid-template-columns: minmax(0, 1fr) 180px; }
+    }
+
+    @media (max-width: 620px) {
+      .shell { width: min(100% - 28px, 1328px); }
+      .topbar { min-height: 58px; }
+      .topbar__links { gap: 12px; }
+      .topbar__links a:first-child { display: none; }
+      .intro { padding: 42px 0 36px; }
+      h1 { font-size: 48px; }
+      .intro__copy { font-size: 16px; }
+      .product figcaption { display: block; }
+      .product figcaption span { display: block; margin-top: 7px; }
+      .proof-strip,
+      .steps,
+      .metrics,
+      .boundaries {
+        grid-template-columns: 1fr;
+      }
+      .proof-strip div,
+      .proof-strip div + div,
+      .proof-strip div:nth-child(3) {
+        padding: 15px 0;
+        border-left: 0;
+        border-top: 1px solid var(--line);
+      }
+      .proof-strip div:first-child { border-top: 0; }
+      .band { padding: 56px 0; }
+      h2 { font-size: 36px; }
+      .step,
+      .step + .step,
+      .metric,
+      .metric + .metric,
+      .boundary,
+      .boundary:nth-child(even) {
+        min-height: 0;
+        padding: 20px 0;
+        border-left: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .step h3 { margin-top: 18px; }
+      .metric strong { margin-top: 20px; }
+      .guided__visual {
+        grid-template-columns: 1fr;
+      }
+      .guided__visual img:last-child {
+        width: 220px;
+        max-height: none;
+        justify-self: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="topbar shell" aria-label="Project navigation">
+    <a class="topbar__brand" href="./">SparePart</a>
+    <div class="topbar__links">
+      <a href="../">Nevil Enyola</a>
+      <a href="https://github.com/enyolanev-bit/sparepart-gemma4">Source</a>
+    </div>
+  </nav>
+
+  <main>
+    <header class="intro shell">
+      <div>
+        <span class="kicker">Gemma 4 · Edge / On-Device · Track 01</span>
+        <h1>SparePart</h1>
+      </div>
+      <div>
+        <p class="intro__copy">Offline drone diagnostics for field teams. A photo becomes a strict, validated repair path on the machine, or the system refuses.</p>
+        <div class="actions">
+          <a class="action action--primary" href="https://github.com/enyolanev-bit/sparepart-gemma4">View source</a>
+          <a class="action" href="https://github.com/enyolanev-bit/sparepart-gemma4/blob/main/RESULTS.md">Read evaluation</a>
+        </div>
+      </div>
+    </header>
+
+    <figure class="product shell">
+      <img src="product-desktop.jpg" alt="SparePart guided drone inspection interface showing a complementary photo and deterministic agreement gate">
+      <figcaption>
+        <span>Recorded QA run on localhost · real Gemma 4 output · Pydantic accepted</span>
+        <span>Static case study · no inference runs on this page</span>
+      </figcaption>
+    </figure>
+
+    <section class="proof-strip shell" aria-label="Runtime proof">
+      <div class="is-ok"><span>Vision model</span><strong>Gemma 4 local</strong></div>
+      <div class="is-ok"><span>Output contract</span><strong>Pydantic validated</strong></div>
+      <div class="is-ok"><span>Network boundary</span><strong>Loopback only</strong></div>
+      <div><span>Final decision</span><strong>Human go / no-go</strong></div>
+    </section>
+
+    <section class="band">
+      <div class="shell">
+        <div class="band-head">
+          <div>
+            <span class="section-label">Field workflow</span>
+            <h2>Photo in. Evidence out. No cloud dependency.</h2>
+          </div>
+          <p>The operator stays inside one continuous workflow. Gemma 4 handles visual perception; Pydantic and deterministic code enforce the boundaries around that output.</p>
+        </div>
+        <div class="steps">
+          <article class="step"><b>01 / Capture</b><h3>Any drone photo</h3><p>Gallery, camera, drag and drop, or clipboard. The app does not fetch an external URL.</p></article>
+          <article class="step"><b>02 / Diagnose</b><h3>Gemma 4 vision</h3><p>The model runs through a local runtime and describes only visible damage.</p></article>
+          <article class="step"><b>03 / Validate</b><h3>Strict structured output</h3><p>Pydantic accepts the JSON contract or SparePart rejects the result after one retry.</p></article>
+          <article class="step"><b>04 / Repair</b><h3>Scannable field actions</h3><p>Numbered guidance remains a proposal. Mechanical inspection stays with the operator.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="shell">
+        <div class="band-head">
+          <div>
+            <span class="section-label">Measured evaluation</span>
+            <h2>Results and failure modes are published together.</h2>
+          </div>
+          <p>Frozen evaluation on 14 photos with real visible damage. The comparison baseline ignores the image and always predicts “propeller.”</p>
+        </div>
+        <div class="metrics">
+          <div class="metric"><span>Gemma 4</span><strong>10/14</strong><p>71% subsystem identification.</p></div>
+          <div class="metric"><span>Non-vision baseline</span><strong>6/14</strong><p>43% when always predicting propeller.</p></div>
+          <div class="metric"><span>Median latency</span><strong>10.0 s</strong><p>Measured per photo on the local machine.</p></div>
+          <div class="metric"><span>Schema validity</span><strong>14/14</strong><p>Every evaluated output passed Pydantic.</p></div>
+        </div>
+        <div class="boundaries">
+          <div class="boundary"><strong>Strongest scope</strong><p>Visible propeller, arm, frame, and gear damage.</p></div>
+          <div class="boundary"><strong>Known blind spots</strong><p>Battery and gimbal damage were missed in this dataset.</p></div>
+          <div class="boundary"><strong>Localization limit</strong><p>Left/right localization is not presented as reliable.</p></div>
+          <div class="boundary is-stop"><strong>No flight clearance</strong><p>A visual diagnosis never authorizes return to flight.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="shell guided">
+        <div class="guided__copy">
+          <span class="section-label">Guided inspection</span>
+          <h2>One more view, without giving the model final authority.</h2>
+          <p>After the first diagnosis, Gemma 4 can request one complementary angle through a constrained <code>InspectionRequest</code>. A second diagnosis runs independently, then deterministic code checks subsystem, damage family, confidence, uncertainty, and drone presence.</p>
+          <p class="disclosure">QA disclosure: the same public drone image was reused for the recorded second pass to validate the mechanics of the pipeline. This is not claimed as independent multi-angle corroboration.</p>
+        </div>
+        <div class="guided__visual">
+          <img src="product-desktop.jpg" alt="Desktop guided inspection layout">
+          <img src="product-mobile.jpg" alt="Mobile deterministic two-view gate">
+        </div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="shell close">
+        <div>
+          <span class="section-label">What is public</span>
+          <h2>The evidence is online. The inference stays on the machine.</h2>
+          <p>This page is a static, shareable case study. The executable Gradio application, model calls, evaluation scripts, dataset notes, and refusal logic are available in the repository.</p>
+        </div>
+        <div class="actions">
+          <a class="action action--primary" href="https://github.com/enyolanev-bit/sparepart-gemma4">Open repository</a>
+          <a class="action" href="../">Back to portfolio</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="shell">
+    SparePart · built for a Gemma 4 on-device hackathon track.<br>
+    Drone image inside the recorded interface: “Crashed quadcopter,” Becky Stern,
+    <a href="https://commons.wikimedia.org/wiki/File:Crashed_quadcopter_(14917581994).jpg">CC BY-SA 2.0</a>.
+  </footer>
+</body>
+</html>
