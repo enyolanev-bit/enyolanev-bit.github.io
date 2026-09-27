@@ -131,43 +131,81 @@
   .work h3 .yr { color: var(--ink-soft); font-weight: 400; }
   .links { margin-top: 56px; color: var(--ink-soft); }
 
+  /* lang switch top-right */
+  .lang-switch {
+    position: fixed;
+    top: 24px;
+    right: 28px;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    user-select: none;
+    z-index: 10;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  .lang-switch button {
+    background: none;
+    border: none;
+    padding: 4px 2px;
+    cursor: pointer;
+    font: inherit;
+    color: var(--ink-soft);
+    text-transform: inherit;
+    letter-spacing: inherit;
+    transition: color 0.15s;
+  }
+  .lang-switch button:hover { color: var(--ink); }
+  .lang-switch button.active { color: var(--ink); }
+  .lang-switch .sep { padding: 0 6px; color: var(--ink-faint); }
+
+  /* hide inactive language */
+  [data-lang]:not(.active) { display: none; }
+
   /* mobile */
   @media (max-width: 580px) {
     body { padding: 56px 22px 80px; font-size: 18px; }
     h1 { font-size: 25px; }
     .photo { width: 80px; height: 80px; margin-bottom: 40px; }
+    .lang-switch { top: 16px; right: 18px; font-size: 11px; }
   }
 </style>
 </head>
 
 <body>
 
+  <div class="lang-switch">
+    <button id="btn-fr" class="active" onclick="setLang('fr')">FR</button><span class="sep">/</span><button id="btn-en" onclick="setLang('en')">EN</button>
+  </div>
+
   <h1>Nevil Bofumbo Enyola</h1>
-  <p class="tagline">systèmes terrain, hardware, IA appliquée.</p>
+  <p class="tagline active" data-lang="fr">systèmes terrain, hardware, IA appliquée.</p>
+  <p class="tagline" data-lang="en">field systems, hardware, applied AI.</p>
 
   <img class="photo" src="avatar.jpg" alt="Nevil Bofumbo Enyola" />
 
+  <div data-lang="fr" class="active">
   <h2>Now</h2>
   <p>Je construis LeakLess, un système de monitoring pour réseaux d&rsquo;eau existants. Premier pilote terrain en préparation sur un bâtiment.</p>
   <p>Je développe ENYOLAB, mon lab hardware personnel autour de l&rsquo;instrumentation, de la robotique et de l&rsquo;edge AI. En ce moment : bras LeRobot SO-101, téléopération et collecte de démonstrations.</p>
 
   <h2>Background</h2>
-  <p>Bac pro maintenance industrielle → BTS assistance technique d&rsquo;ingénieur → licence supply chain &amp; maintenance industrielle → MIT Professional Education.</p>
+  <p>Bac pro MEI (Lycée Paul Belmondo) &rarr; BTS ATI, assistance technique d&rsquo;ingénieur (Lycée Jacquard) &rarr; licence supply chain &amp; maintenance industrielle &rarr; MIT Professional Education.</p>
   <p>Mon parcours s&rsquo;est construit autour de systèmes physiques réels, en atelier comme sur le terrain : intégration, diagnostic, test, coordination technique et conception d&rsquo;outils de validation.</p>
 
   <h2>Previously</h2>
   <ul>
-    <li><strong>Technogym France</strong> — Field Engineer / Support N2. Diagnostic, qualité des équipements chez le client, retours et sorties d&rsquo;usine, upgrades.</li>
-    <li><strong>Eclairions</strong> — Smart Hands freelance en data center, notamment sur infrastructure Supermicro.</li>
-    <li><strong>Henry Schein</strong> — Coordinateur technique SAV L1–L3 pour une équipe de 14 techniciens terrain, équipements dentaires.</li>
-    <li><strong>Eurotec Dental / A-dec</strong> — stages, alternance puis CDI, en atelier et sur le terrain. Bancs de test, intégration et projet Bien-Air iOptima sur équipement A-dec.</li>
+    <li><strong>Technogym France</strong> &mdash; Field Engineer / Support N2. Diagnostic, qualité des équipements chez le client, retours et sorties d&rsquo;usine, upgrades.</li>
+    <li><strong>Eclairions</strong> &mdash; Smart Hands freelance en data center, notamment sur infrastructure Supermicro.</li>
+    <li><strong>Henry Schein</strong> &mdash; Coordinateur technique SAV L1&ndash;L3 pour une équipe de 14 techniciens terrain, équipements dentaires. 2 ans et 3 mois.</li>
+    <li><strong>Eurotec Dental / A-dec</strong> &mdash; stages, alternance BTS, puis 11 mois en CDI, en atelier et sur le terrain. Bancs de test, intégration et projet Bien-Air iOptima sur équipement A-dec.</li>
   </ul>
 
   <h2>Selected work</h2>
 
   <div class="work">
     <h3>Banc de test unifié <span class="yr">[2020]</span></h3>
-    <p>Conçu pour remplacer deux postes de test séparés — pneumatique/eau et électrique — par un seul banc. Alimentation 230→24 V, circuit d&rsquo;eau autonome avec purge et sélection des modes de test. Spécifié avec la méthode APTE, conçu et construit pendant mon BTS. Toujours utilisé en production. <a href="https://github.com/enyolanev-bit/banc-test-2020">case study →</a></p>
+    <p>Conçu pour remplacer deux postes de test séparés &mdash; pneumatique/eau et électrique &mdash; par un seul banc. Alimentation 230&rarr;24 V, circuit d&rsquo;eau autonome avec purge et sélection des modes de test. Spécifié avec la méthode APTE, conçu et construit pendant mon BTS. Toujours en service six ans plus tard. <a href="https://github.com/enyolanev-bit/banc-test-2020">case study &rarr;</a></p>
   </div>
 
   <div class="work">
@@ -176,20 +214,85 @@
   </div>
 
   <div class="work">
-    <h3>ENYOLAB — SO-101 <span class="yr">[2026]</span></h3>
+    <h3>ENYOLAB &mdash; SO-101 <span class="yr">[2026]</span></h3>
     <p>Bras LeRobot SO-101 leader/follower monté, calibré et téléopéré. Prochaine étape : collecte de démonstrations, entraînement de politiques d&rsquo;imitation et déploiement sur le système physique.</p>
   </div>
 
   <div class="work">
     <h3>Sample-efficient imitation <span class="yr">[2026]</span></h3>
     <p>Expérience sur Diffusion Policy / PushT : est-ce que la régularisation améliore l&rsquo;efficacité en données lorsque le nombre de démonstrations est limité ?</p>
-    <p>À 100 démonstrations : 8 % → 19 % puis 8 % → 22 % sur deux seeds. À 200 démonstrations : aucun gain observé. Résultat préliminaire ; la baseline reste inférieure à la référence publiée. <a href="./sample-efficient-imitation/">résultats →</a></p>
+    <p>À 100 démonstrations : 8 % &rarr; 19 % puis 8 % &rarr; 22 % sur deux seeds. À 200 démonstrations : aucun gain observé. Résultat préliminaire ; la baseline reste inférieure à la référence publiée. <a href="./sample-efficient-imitation/">résultats &rarr;</a></p>
   </div>
 
   <p class="links">
-    <a href="mailto:enyola.nv@gmail.com">email</a> ·
+    <a href="mailto:enyola.nv@gmail.com">email</a> &middot;
     <a href="https://github.com/enyolanev-bit">GitHub</a>
   </p>
+  </div>
+
+  <div data-lang="en">
+  <h2>Now</h2>
+  <p>I am building LeakLess, a monitoring system for existing water networks. First field pilot in preparation on a building.</p>
+  <p>I am developing ENYOLAB, my personal hardware lab around instrumentation, robotics and edge AI. Currently: LeRobot SO-101 arm, teleoperation and demonstration collection.</p>
+
+  <h2>Background</h2>
+  <p>Bac pro MEI, industrial equipment maintenance (Lycée Paul Belmondo) &rarr; BTS ATI, engineering technician assistant (Lycée Jacquard) &rarr; bachelor&rsquo;s degree in supply chain &amp; industrial maintenance &rarr; MIT Professional Education.</p>
+  <p>My path was built around real physical systems, in the workshop as well as in the field: integration, diagnostics, testing, technical coordination and the design of validation tooling.</p>
+
+  <h2>Previously</h2>
+  <ul>
+    <li><strong>Technogym France</strong> &mdash; Field Engineer / Level 2 Support. Diagnostics, equipment quality at customer sites, returns and factory outputs, upgrades.</li>
+    <li><strong>Eclairions</strong> &mdash; freelance data centre Smart Hands, notably on Supermicro infrastructure.</li>
+    <li><strong>Henry Schein</strong> &mdash; technical service coordinator, L1&ndash;L3, for a team of 14 field technicians, dental equipment. 2 years and 3 months.</li>
+    <li><strong>Eurotec Dental / A-dec</strong> &mdash; internships, BTS apprenticeship year, then 11 months on a permanent contract, in the workshop and in the field. Test benches, integration and the Bien-Air iOptima project on A-dec equipment.</li>
+  </ul>
+
+  <h2>Selected work</h2>
+
+  <div class="work">
+    <h3>Unified test bench <span class="yr">[2020]</span></h3>
+    <p>Designed to replace two separate test stations &mdash; pneumatic/water and electrical &mdash; with a single bench. 230&rarr;24 V power supply, self-contained water circuit with purge and test mode selection. Specified with the APTE method, designed and built during my BTS. Still in service six years later. <a href="https://github.com/enyolanev-bit/banc-test-2020">case study &rarr;</a></p>
+  </div>
+
+  <div class="work">
+    <h3>LeakLess <span class="yr">[2026]</span></h3>
+    <p>Monitoring of existing water networks. Instrumentation, field acquisition and validation on a hydraulic bench before deployment. First pilot in preparation on a building.</p>
+  </div>
+
+  <div class="work">
+    <h3>ENYOLAB &mdash; SO-101 <span class="yr">[2026]</span></h3>
+    <p>LeRobot SO-101 leader/follower arm assembled, calibrated and teleoperated. Next step: demonstration collection, imitation policy training and deployment on the physical system.</p>
+  </div>
+
+  <div class="work">
+    <h3>Sample-efficient imitation <span class="yr">[2026]</span></h3>
+    <p>Experiment on Diffusion Policy / PushT: does regularisation improve data efficiency when the number of demonstrations is limited?</p>
+    <p>At 100 demonstrations: 8 % &rarr; 19 % then 8 % &rarr; 22 % across two seeds. At 200 demonstrations: no gain observed. Preliminary result; the baseline remains below the published reference. <a href="./sample-efficient-imitation/">results &rarr;</a></p>
+  </div>
+
+  <p class="links">
+    <a href="mailto:enyola.nv@gmail.com">email</a> &middot;
+    <a href="https://github.com/enyolanev-bit">GitHub</a>
+  </p>
+  </div>
+
+  <script>
+    // Bascule de langue (persistee dans localStorage ; defaut FR, langue du site publie).
+    function setLang(lang) {
+      document.documentElement.lang = lang;
+      document.querySelectorAll('[data-lang]').forEach(function (el) {
+        el.classList.toggle('active', el.dataset.lang === lang);
+      });
+      document.getElementById('btn-fr').classList.toggle('active', lang === 'fr');
+      document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+      try { localStorage.setItem('lang', lang); } catch (e) {}
+    }
+    (function () {
+      var saved = 'fr';
+      try { saved = localStorage.getItem('lang') || 'fr'; } catch (e) {}
+      if (saved === 'en') setLang('en');
+    })();
+  </script>
 
 </body>
 </html>
